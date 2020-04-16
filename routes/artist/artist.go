@@ -1,12 +1,72 @@
 package artist
 
 import (
+	"encoding/json"
 	"git.jacobcasper.com/brackets/env"
 	"git.jacobcasper.com/brackets/routes"
+	"git.jacobcasper.com/brackets/types"
 	"github.com/zmb3/spotify"
 	"log"
 	"net/http"
 )
+
+func Index(env *env.Env) routes.Handler {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+
+		artistId := r.FormValue("id")
+		if artistId != "" {
+			artist := types.Artist{}
+			row := env.Db.Db.QueryRow("SELECT ID, NAME FROM ARTIST WHERE ID = ?", artistId)
+			if err := row.Scan(&artist.ID, &artist.Name); err != nil {
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+				return
+			}
+			b, err := json.Marshal(artist)
+			if err != nil {
+				log.Print(err)
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+				return
+			}
+			w.Write(b)
+			return
+		}
+
+		rows, err := env.Db.Db.Query("SELECT ID, NAME FROM ARTIST LIMIT 20")
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
+
+		artists := make([]types.Artist, 0)
+		for rows.Next() {
+			artist := types.Artist{}
+			if err := rows.Scan(&artist.ID, &artist.Name); err != nil {
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+				return
+			}
+			artists = append(artists, artist)
+		}
+		if err = rows.Err(); err != nil {
+			log.Print(err)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+		b, err := json.Marshal(artists)
+		if err != nil {
+			log.Print(err)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+		w.Write(b)
+	}
+}
 
 func Add(env *env.Env) routes.Handler {
 	return func(w http.ResponseWriter, r *http.Request) {

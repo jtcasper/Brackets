@@ -15,6 +15,11 @@ func main() {
 	}
 
 	http.HandleFunc(
+		"/artist/",
+		artist.Index(env),
+	)
+
+	http.HandleFunc(
 		"/artist/add",
 		artist.Add(env),
 	)
