@@ -25,7 +25,7 @@ func main() {
 		}
 		for _, trackPage := range tracks.Tracks {
 			for _, artist := range trackPage.Track.Artists {
-				http.PostForm("http://localhost:8080/artist/add", url.Values{"artist_id": {string(artist.ID)}})
+				http.PostForm("http://localhost:8080/artist/add", url.Values{"id": {string(artist.ID)}})
 			}
 		}
 	}

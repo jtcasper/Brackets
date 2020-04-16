@@ -38,7 +38,7 @@ func addArtistHandler(db *db.DB, c *spotify.Client) handler {
 		}
 
 		r.ParseForm()
-		artistId := r.PostForm.Get("artist_id")
+		artistId := r.PostForm.Get("id")
 
 		if artistId == "" {
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
