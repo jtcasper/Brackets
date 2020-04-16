@@ -12,7 +12,7 @@ type DB struct {
 }
 
 func New() (*DB, error) {
-	db, err := sql.Open("sqlite3", "brackets.sqlite")
+	db, err := sql.Open("sqlite3", "brackets.sqlite?_journal_mode=WAL&_foreign_keys=on")
 	if err != nil {
 		return nil, err
 	}
