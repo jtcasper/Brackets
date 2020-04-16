@@ -114,3 +114,46 @@ func Add(env *env.Env) routes.Handler {
 		w.WriteHeader(http.StatusCreated)
 	}
 }
+
+func ByGenre(env *env.Env) routes.Handler {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		genreName := r.FormValue("genre_name")
+		if genreName != "" {
+			rows, err := env.Db.Db.Query("SELECT ID, NAME FROM ARTIST WHERE ID IN (SELECT ARTIST_ID FROM ARTIST_GENRE_XREF WHERE GENRE_ID IN (SELECT ID FROM GENRE WHERE NAME = lower(?))) LIMIT 20", genreName)
+			if err != nil {
+				log.Print(err)
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+				return
+			}
+			defer rows.Close()
+
+			artists := make([]types.Artist, 0)
+			for rows.Next() {
+				artist := types.Artist{}
+				if err := rows.Scan(&artist.ID, &artist.Name); err != nil {
+					http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+					return
+				}
+				artists = append(artists, artist)
+			}
+			if err = rows.Err(); err != nil {
+				log.Print(err)
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+				return
+			}
+			b, err := json.Marshal(artists)
+			if err != nil {
+				log.Print(err)
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+				return
+			}
+			w.Write(b)
+		}
+	}
+}

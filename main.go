@@ -15,15 +15,9 @@ func main() {
 		log.Fatal("Could not set up Env: ", err.Error())
 	}
 
-	http.HandleFunc(
-		"/artist/",
-		artist.Index(env),
-	)
-
-	http.HandleFunc(
-		"/artist/add",
-		artist.Add(env),
-	)
+	http.HandleFunc("/artist/", artist.Index(env))
+	http.HandleFunc("/artist/genre", artist.ByGenre(env))
+	http.HandleFunc("/artist/add", artist.Add(env))
 
 	http.HandleFunc("/genre", genre.Index(env))
 
