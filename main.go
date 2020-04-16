@@ -3,6 +3,7 @@ package main
 import (
 	"git.jacobcasper.com/brackets/env"
 	"git.jacobcasper.com/brackets/routes/artist"
+	"git.jacobcasper.com/brackets/routes/genre"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"net/http"
@@ -23,6 +24,8 @@ func main() {
 		"/artist/add",
 		artist.Add(env),
 	)
+
+	http.HandleFunc("/genre", genre.Index(env))
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
