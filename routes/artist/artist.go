@@ -95,7 +95,7 @@ func Add(env *env.Env) routes.Handler {
 		env.Db.Db.Exec("INSERT INTO ARTIST (ID, NAME) VALUES (?, ?)", artist.ID, artist.Name)
 
 		for _, genre := range artist.Genres {
-			result, err := env.Db.Db.Exec("REPLACE INTO GENRE (NAME) VALUES (?)", genre)
+			result, err := env.Db.Db.Exec("INSERT OR IGNORE INTO GENRE (NAME) VALUES (?)", genre)
 			if err != nil {
 				log.Printf("Failed to insert genre %s: %s", genre, err.Error())
 				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
