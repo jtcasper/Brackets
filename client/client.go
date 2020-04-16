@@ -21,5 +21,6 @@ func Get() (*spotify.Client, error) {
 	}
 
 	client := spotify.Authenticator{}.NewClient(token)
+	client.AutoRetry = true
 	return &client, nil
 }
