@@ -1,4 +1,5 @@
-brackets*
+brackets
+brackets.sqlite*
 backend/scrape/seed/seed
 secrets.sh
 vendor/

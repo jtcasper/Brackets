@@ -1,0 +1,17 @@
+[Unit]
+Description=Brackets API Server
+After=network.target
+
+[Service]
+Type=simple
+User=brackets
+Group=brackets
+WorkingDirectory=/usr/share/brackets
+StandardOutput=syslog
+StandardError=syslog
+ExecStart=/opt/brackets/backend/brackets
+
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
