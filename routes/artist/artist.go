@@ -24,12 +24,12 @@ func Index(env *env.Env) routes.Handler {
 		if artistId != "" {
 			artist := types.Artist{}
 			row := env.Db.Db.QueryRow(`
-SELECT ID, NAME
+SELECT ID, NAME, POPULARITY
 FROM ARTIST
 WHERE ID = ?`,
 				artistId,
 			)
-			if err := row.Scan(&artist.ID, &artist.Name); err != nil {
+			if err := row.Scan(&artist.ID, &artist.Name, &artist.Popularity); err != nil {
 				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 				return
 			}
@@ -44,7 +44,7 @@ WHERE ID = ?`,
 		}
 
 		rows, err := env.Db.Db.Query(`
-SELECT ID, NAME
+SELECT ID, NAME, POPULARITY
 FROM ARTIST
 LIMIT 20`,
 		)
@@ -57,7 +57,7 @@ LIMIT 20`,
 		artists := make([]types.Artist, 0)
 		for rows.Next() {
 			artist := types.Artist{}
-			if err := rows.Scan(&artist.ID, &artist.Name); err != nil {
+			if err := rows.Scan(&artist.ID, &artist.Name, &artist.Popularity); err != nil {
 				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 				return
 			}
@@ -104,10 +104,11 @@ func Add(env *env.Env) routes.Handler {
 		defer env.Db.Mu.Unlock()
 		env.Db.Db.Exec(`
 INSERT INTO ARTIST
-(ID, NAME)
-VALUES (?, ?)`,
+(ID, NAME, POPULARITY)
+VALUES (?, ?, ?)`,
 			artist.ID,
 			artist.Name,
+			artist.Popularity,
 		)
 
 		for _, genre := range artist.Genres {
@@ -183,7 +184,7 @@ WHERE g.NAME = lower(?)
 			artists := make([]types.Artist, 0)
 			for rows.Next() {
 				artist := types.Artist{}
-				if err := rows.Scan(&artist.ID, &artist.Name); err != nil {
+				if err := rows.Scan(&artist.ID, &artist.Name, &artist.Popularity); err != nil {
 					http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 					return
 				}
