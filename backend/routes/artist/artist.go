@@ -166,7 +166,7 @@ func ByGenre(env *env.Env) routes.Handler {
 		genreName := r.FormValue("genre_name")
 		if genreName != "" {
 			rows, err := env.Db.Db.Query(`
-SELECT a.ID, a.NAME
+SELECT a.ID, a.NAME, a.POPULARITY
 FROM ARTIST a
 JOIN ARTIST_GENRE_XREF x ON a.ID = x.ARTIST_ID
 JOIN GENRE g ON g.ID = x.GENRE_ID
@@ -185,6 +185,7 @@ WHERE g.NAME = lower(?)
 			for rows.Next() {
 				artist := types.Artist{}
 				if err := rows.Scan(&artist.ID, &artist.Name, &artist.Popularity); err != nil {
+					log.Print(err)
 					http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 					return
 				}
