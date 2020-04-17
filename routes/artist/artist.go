@@ -23,7 +23,12 @@ func Index(env *env.Env) routes.Handler {
 		artistId := r.FormValue("id")
 		if artistId != "" {
 			artist := types.Artist{}
-			row := env.Db.Db.QueryRow("SELECT ID, NAME FROM ARTIST WHERE ID = ?", artistId)
+			row := env.Db.Db.QueryRow(`
+SELECT ID, NAME
+FROM ARTIST
+WHERE ID = ?`,
+				artistId,
+			)
 			if err := row.Scan(&artist.ID, &artist.Name); err != nil {
 				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 				return
@@ -38,7 +43,11 @@ func Index(env *env.Env) routes.Handler {
 			return
 		}
 
-		rows, err := env.Db.Db.Query("SELECT ID, NAME FROM ARTIST LIMIT 20")
+		rows, err := env.Db.Db.Query(`
+SELECT ID, NAME
+FROM ARTIST
+LIMIT 20`,
+		)
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
@@ -93,7 +102,13 @@ func Add(env *env.Env) routes.Handler {
 
 		env.Db.Mu.Lock()
 		defer env.Db.Mu.Unlock()
-		env.Db.Db.Exec("INSERT INTO ARTIST (ID, NAME) VALUES (?, ?)", artist.ID, artist.Name)
+		env.Db.Db.Exec(`
+INSERT INTO ARTIST
+(ID, NAME)
+VALUES (?, ?)`,
+			artist.ID,
+			artist.Name,
+		)
 
 		for _, genre := range artist.Genres {
 			var genreId int64
@@ -102,11 +117,17 @@ SELECT ID
 FROM GENRE
 WHERE NAME = lower(?)
 `,
-				genre)
+				genre,
+			)
 
 			err := row.Scan(&genreId)
 			if err == sql.ErrNoRows {
-				result, err := env.Db.Db.Exec("INSERT INTO GENRE (NAME) VALUES (?)", genre)
+				result, err := env.Db.Db.Exec(`
+INSERT INTO GENRE
+(NAME)
+VALUES (?)`,
+					genre,
+				)
 				if err != nil {
 					log.Printf("Failed to insert genre %s: %s", genre, err.Error())
 					http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -121,7 +142,13 @@ WHERE NAME = lower(?)
 				}
 			}
 
-			env.Db.Db.Exec("INSERT INTO ARTIST_GENRE_XREF (ARTIST_ID, GENRE_ID) VALUES (?, ?)", artist.ID, genreId)
+			env.Db.Db.Exec(`
+INSERT INTO ARTIST_GENRE_XREF
+(ARTIST_ID, GENRE_ID)
+VALUES (?, ?)`,
+				artist.ID,
+				genreId,
+			)
 		}
 		w.WriteHeader(http.StatusCreated)
 	}
@@ -137,7 +164,15 @@ func ByGenre(env *env.Env) routes.Handler {
 		w.Header().Set("Content-Type", "application/json")
 		genreName := r.FormValue("genre_name")
 		if genreName != "" {
-			rows, err := env.Db.Db.Query("SELECT ID, NAME FROM ARTIST WHERE ID IN (SELECT ARTIST_ID FROM ARTIST_GENRE_XREF WHERE GENRE_ID IN (SELECT ID FROM GENRE WHERE NAME = lower(?))) LIMIT 20", genreName)
+			rows, err := env.Db.Db.Query(`
+SELECT a.ID, a.NAME
+FROM ARTIST a
+JOIN ARTIST_GENRE_XREF x ON a.ID = x.ARTIST_ID
+JOIN GENRE g ON g.ID = x.GENRE_ID
+WHERE g.NAME = lower(?)
+`,
+				genreName,
+			)
 			if err != nil {
 				log.Print(err)
 				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)

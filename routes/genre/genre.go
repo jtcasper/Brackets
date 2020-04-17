@@ -21,7 +21,12 @@ func Index(env *env.Env) routes.Handler {
 		genreName := r.FormValue("name")
 		if genreName != "" {
 			genre := types.Genre{}
-			row := env.Db.Db.QueryRow("SELECT ID, NAME FROM GENRE WHERE NAME = lower(?)", genreName)
+			row := env.Db.Db.QueryRow(`
+SELECT ID, NAME
+FROM GENRE
+WHERE NAME = lower(?)`,
+				genreName,
+			)
 			if err := row.Scan(&genre.ID, &genre.Name); err != nil {
 				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 				return
@@ -36,7 +41,11 @@ func Index(env *env.Env) routes.Handler {
 			return
 		}
 
-		rows, err := env.Db.Db.Query("SELECT ID, NAME FROM GENRE LIMIT 20")
+		rows, err := env.Db.Db.Query(`
+SELECT ID, NAME
+FROM GENRE
+LIMIT 20`,
+		)
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return

@@ -20,7 +20,8 @@ WHERE ID NOT IN (
   SELECT ARTIST_ID
 	FROM SCRAPED_ARTIST
 	WHERE SCRAPED == 1
-)`)
+)`,
+		)
 		if err != nil {
 			log.Print(err)
 			continue infinite
@@ -50,7 +51,8 @@ SELECT EXISTS (
 	WHERE ID = ?
 )
 `,
-					artist.ID)
+					artist.ID,
+				)
 				var exists bool
 				if err := row.Scan(&exists); err != nil {
 					// We don't care, this was a short circuit check
@@ -75,7 +77,8 @@ SELECT EXISTS (
 				env.Db.Db.Exec(`
 REPLACE INTO SCRAPED_ARTIST (ARTIST_ID, SCRAPED)
 VALUES (?, 1)`,
-					string(artistId))
+					string(artistId),
+				)
 				env.Db.Mu.Unlock()
 			}
 		}
