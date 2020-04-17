@@ -7,8 +7,9 @@ import (
 )
 
 type Env struct {
-	Db *db.DB
-	C  *spotify.Client
+	Db         *db.DB
+	C          *spotify.Client
+	CorsOrigin string
 }
 
 func New() (*Env, error) {
@@ -21,5 +22,14 @@ func New() (*Env, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Env{Db: db, C: client}, nil
+	return &Env{
+			Db:         db,
+			C:          client,
+			CorsOrigin: "http://brackets.jacobcasper.com",
+		},
+		nil
+}
+
+func (e *Env) Local() {
+	e.CorsOrigin = "*"
 }

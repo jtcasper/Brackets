@@ -16,6 +16,8 @@ func Index(env *env.Env) routes.Handler {
 			return
 		}
 
+		w.Header().Set("Access-Control-Allow-Origin", env.CorsOrigin)
+		w.Header().Set("Vary", "Origin")
 		w.Header().Set("Content-Type", "application/json")
 
 		genreName := r.FormValue("name")

@@ -18,6 +18,8 @@ func Index(env *env.Env) routes.Handler {
 			return
 		}
 
+		w.Header().Set("Access-Control-Allow-Origin", env.CorsOrigin)
+		w.Header().Set("Vary", "Origin")
 		w.Header().Set("Content-Type", "application/json")
 
 		artistId := r.FormValue("id")
@@ -162,7 +164,10 @@ func ByGenre(env *env.Env) routes.Handler {
 			return
 		}
 
+		w.Header().Set("Access-Control-Allow-Origin", env.CorsOrigin)
+		w.Header().Set("Vary", "Origin")
 		w.Header().Set("Content-Type", "application/json")
+
 		genreName := r.FormValue("genre_name")
 		if genreName != "" {
 			rows, err := env.Db.Db.Query(`
