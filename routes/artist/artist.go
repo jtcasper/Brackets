@@ -1,6 +1,7 @@
 package artist
 
 import (
+	"database/sql"
 	"encoding/json"
 	"git.jacobcasper.com/brackets/env"
 	"git.jacobcasper.com/brackets/routes"
@@ -95,18 +96,29 @@ func Add(env *env.Env) routes.Handler {
 		env.Db.Db.Exec("INSERT INTO ARTIST (ID, NAME) VALUES (?, ?)", artist.ID, artist.Name)
 
 		for _, genre := range artist.Genres {
-			result, err := env.Db.Db.Exec("INSERT OR IGNORE INTO GENRE (NAME) VALUES (?)", genre)
-			if err != nil {
-				log.Printf("Failed to insert genre %s: %s", genre, err.Error())
-				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-				return
-			}
+			var genreId int64
+			row := env.Db.Db.QueryRow(`
+SELECT ID
+FROM GENRE
+WHERE NAME = lower(?)
+`,
+				genre)
 
-			genreId, err := result.LastInsertId()
-			if err != nil {
-				log.Print("Failed to retrieve last insert id: ", err.Error())
-				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-				return
+			err := row.Scan(&genreId)
+			if err == sql.ErrNoRows {
+				result, err := env.Db.Db.Exec("INSERT INTO GENRE (NAME) VALUES (?)", genre)
+				if err != nil {
+					log.Printf("Failed to insert genre %s: %s", genre, err.Error())
+					http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+					return
+				}
+
+				genreId, err = result.LastInsertId()
+				if err != nil {
+					log.Print("Failed to retrieve last insert id: ", err.Error())
+					http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+					return
+				}
 			}
 
 			env.Db.Db.Exec("INSERT INTO ARTIST_GENRE_XREF (ARTIST_ID, GENRE_ID) VALUES (?, ?)", artist.ID, genreId)
