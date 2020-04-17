@@ -43,6 +43,22 @@ WHERE ID NOT IN (
 			success := true
 		postArtists:
 			for _, artist := range artists {
+				row := env.Db.Db.QueryRow(`
+SELECT EXISTS (
+	SELECT 1
+	FROM ARTIST
+	WHERE ID = ?
+)
+`,
+					artist.ID)
+				var exists bool
+				if err := row.Scan(&exists); err != nil {
+					// We don't care, this was a short circuit check
+				}
+				if exists {
+					continue postArtists
+				}
+
 				resp, err := http.PostForm("http://localhost:8080/artist/add", url.Values{"id": {string(artist.ID)}})
 				if err != nil {
 					log.Print(err)
