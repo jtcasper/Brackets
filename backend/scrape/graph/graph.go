@@ -26,18 +26,19 @@ WHERE ID NOT IN (
 			log.Print(err)
 			continue infinite
 		}
-		defer rows.Close()
 
 		var artistId string
 		for rows.Next() {
 			if err := rows.Scan(&artistId); err != nil {
 				log.Print(err)
+				rows.Close()
 				continue infinite
 			}
 
 			artists, err := env.C.GetRelatedArtists(spotify.ID(artistId))
 			if err != nil {
 				log.Print(err)
+				rows.Close()
 				continue infinite
 			}
 
