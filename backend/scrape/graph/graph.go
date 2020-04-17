@@ -62,6 +62,7 @@ SELECT EXISTS (
 				}
 
 				resp, err := http.PostForm("http://localhost:8080/artist/add", url.Values{"id": {string(artist.ID)}})
+				resp.Body.Close()
 				if err != nil {
 					log.Print(err)
 					success = false
