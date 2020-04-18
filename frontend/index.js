@@ -18,36 +18,77 @@ const relativeToCtx = (x1, x2, y1, y2, ctx) => {
     return [newX, newY];
 }
 
-const drawBracket = (canvas, ...artists) => {
+/**
+ * Return (x,y) of canvas
+ */
+const getDimensions = (canvas) => [canvas.width, canvas.height];
+
+/**
+ * Return (x,y) midpoint of canvas
+ */
+const getCenter = (canvas) => getDimensions(canvas).map((dim) => dim / 2);
+
+/**
+ * Draw champion box and clear background.
+ */
+const drawWinner = (canvas) => {
     const ctx = canvas.getContext("2d");
-    const height = canvas.height;
-    const width = canvas.width;
-    const mid_x = width / 2;
-    const mid_y = height / 2;
+    const [width, height] = getDimensions(canvas);
+    const [mid_x, mid_y] = getCenter(canvas);
     const rect_width = width * .5;
     const rect_height = height * .1;
     ctx.strokeRect(mid_x - rect_width / 2, mid_y - rect_height / 2, rect_width, rect_height);
     ctx.clearRect(mid_x - rect_width / 2, mid_y - rect_height / 2, rect_width, rect_height);
+}
 
-    relativeTo = (x1, x2, y1, y2) => relativeToCtx(x1, x2, y1, y2, ctx);
-    let [x, y] = [mid_x, mid_y - rect_height / 2];
+/**
+ * Draws a path in context from the current location to a point xDist * left, yDist * up away from it.
+ * @param ctx RenderingContext
+ * @param x, y float current location
+ * @param x, y float distance away
+ * @param up, left (-1|1) directions
+ * @return [newNodeX, newNodeY]
+ */
+const drawBranchFrom = (ctx, x, y, xDist, yDist, left, up) => {
+    const newX = x + (xDist * left)
+    const newY = y + (yDist * up)
+    ctx.lineTo(x, newY);
+    ctx.lineTo(newX, newY);
+    return [newX, newY];
+}
+
+const drawArtistOnCtx = (ctx, artistName, x, y) => ctx.strokeText(artistName, x, y);
+
+/**
+ * Draws paths to the terminal nodes of a round
+ * @param x, y the point representation of the start of the branch
+ */
+const drawMatchup = (canvas, x, y, iter, left) => {
+    const ctx =  canvas.getContext("2d");
+    const [width, height] = getDimensions(canvas);
+
+    const drawBranchUp = (xDist, yDist) => drawBranchFrom(ctx, x, y, xDist, yDist, left, 1);
+    const drawBranchDown = (xDist, yDist) => drawBranchFrom(ctx, x, y, xDist, yDist, left, -1);
+    const drawArtist = (artistName, x, y) => drawArtistOnCtx(ctx, artistName, x, y);
+
     ctx.beginPath();
-    ctx.moveTo(mid_x, mid_y - rect_height / 2);
-    [x, y] = relativeTo(x, 0, y, -height * .2);
-    [x, y] = relativeTo(x, -width * .05, y, 0);
-    const [branch1x, branch1y] = [x, y];
-    [x, y] = relativeTo(x, 0, y, -height * .05);
-    [x, y] = relativeTo(x, -width * .10, y, 0);
-    const [branch2x, branch2y] = [x, y];
-    [x, y] = relativeTo(x, 0, y, -height * .05);
-    [x, y] = relativeTo(x, -width * .15, y, 0);
-    const [branch3x, branch3y] = [x, y];
-    [x, y] = relativeTo(x, 0, y, -height * .05);
-    [x, y] = relativeTo(x, -width * .15, y, 0);
-    ctx.moveTo(branch3x, branch3y);
-    [x, y] = relativeTo(branch3x, 0, branch3y, height * .05);
-    [x, y] = relativeTo(x, -width * .15, y, 0);
+    ctx.moveTo(x, y);
+    drawArtist(
+        'test',
+        ...drawBranchUp(width / iter, height / iter)
+    );
+    ctx.moveTo(x, y);
+    drawArtist(
+        'test2',
+        ...drawBranchDown(width / iter, height / iter)
+    );
     ctx.stroke();
+}
+
+const drawBracket = (canvas, ...artists) => {
+    drawWinner(canvas);
+    const [mid_x, mid_y] = getCenter(canvas);
+    drawMatchup(canvas, mid_x, mid_y, 2 * 3, -1);
 }
 
 window.onload = () => {
