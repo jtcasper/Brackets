@@ -1,0 +1,14 @@
+ul {
+    position: absolute;
+    display: none;
+}
+li {
+    display: block;
+    background-color: white;
+}
+input#genre-submit {
+    display: none;
+}
+canvas {
+    border: 1px dashed black;
+}
