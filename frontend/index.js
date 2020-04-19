@@ -76,7 +76,7 @@ const drawBranchFrom = (ctx, x, y, xDist, yDist, left, up) => {
 }
 
 const drawArtistOnCtx = (ctx, artistName, x, y) => {
-    ctx.font = "1em sans serif";
+    ctx.font = "20px sans serif";
     ctx.strokeText(artistName, x, y);
 }
 
@@ -137,8 +137,8 @@ const drawBracket = (canvas, artists, genre) => {
     for (let group = 1; group <= groups; group++) {
             drawMatchup(
                 canvas,
-                mid_x + (Math.pow(-1, group) * (rect_width / 4)),
-                mid_y + (Math.pow(-1, Math.floor(group / 2)) * (rect_height * 2)),
+                mid_x + (Math.pow(-1, group) * (rect_width / 6)),
+                mid_y + (Math.pow(-1, Math.floor(group / 2)) * (rect_height * 2.5)),
                 0,
                 rounds,
                 Math.pow(-1, group),
