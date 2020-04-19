@@ -156,7 +156,7 @@ window.onload = () => {
     const canvas = document.getElementById("bracket");
 
     const formSubmitAction = () => {
-        fetch(encodeURI(`http://localhost:8080/artist/genre?genre_name=${genreInput.value}`))
+        fetch(encodeURI(`http://api.brackets.jacobcasper.com/artist/genre?genre_name=${genreInput.value}`))
         .then((response) => response.json())
         .then((data) => drawBracket(canvas, data.slice(0, 33), genreInput.value));
     }
@@ -169,7 +169,7 @@ window.onload = () => {
     }
     let genres = JSON.parse(lStorage.getItem("genres"))
     if (genres === null) {
-        fetch("http://localhost:8080/genre")
+        fetch("http://api.brackets.jacobcasper.com/genre")
             .then((response) => response.text())
             .then((text) => {
                 window.localStorage.setItem("genres", text);
