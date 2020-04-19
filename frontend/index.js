@@ -130,7 +130,9 @@ const drawBracket = (canvas, artists, genre) => {
     drawWinner(canvas);
     const [mid_x, mid_y] = getCenter(canvas);
     context.font = '28px sans serif'
-    context.strokeText(genre.toUpperCase(), mid_x - (28 * (genre.length / 3)), 40);
+    context.textAlign = "center";
+    context.strokeText(genre.toUpperCase(), mid_x, 40);
+    context.textAlign = "start";
     const [rect_width, rect_height] = getRectangleDimensions(canvas);
     const groups = 4;
     const rounds = Math.floor(Math.log2(artists.length / groups));
