@@ -6,6 +6,10 @@ li {
     display: block;
     background-color: white;
 }
+li:hover {
+    background-color: black;
+    color: white;
+}
 input#genre-submit {
     display: none;
 }
