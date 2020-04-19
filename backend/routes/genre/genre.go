@@ -45,7 +45,8 @@ WHERE NAME = lower(?)`,
 
 		rows, err := env.Db.Db.Query(`
 SELECT ID, NAME
-FROM GENRE`,
+FROM GENRE
+ORDER BY NAME ASC`,
 		)
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
