@@ -133,9 +133,7 @@ window.onload = () => {
 
     genreInput.addEventListener("input", (e) => {
         const input = e.target;
-        for (const item of genreList.children) {
-            item.style.display = item.dataset.name.includes(input.value.toLowerCase()) ? "block" : "none";
-        }
+        Array.from(genreList.children).forEach((item) => item.style.display= item.dataset.name.includes(input.value.toLowerCase()) ? "block" : "none");
     });
     genreInput.addEventListener("focus", (e) => {
         genreList.style.display = "block";
