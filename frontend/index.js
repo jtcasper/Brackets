@@ -125,6 +125,7 @@ const drawMatchup = (canvas, x, y, iter, maxIter, left, artists, baseCallback) =
 }
 
 const drawBracket = (canvas, artists) => {
+    const context = canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
     drawWinner(canvas);
     const [mid_x, mid_y] = getCenter(canvas);
     const [rect_width, rect_height] = getRectangleDimensions(canvas);
