@@ -63,7 +63,7 @@ const drawArtistOnCtx = (ctx, artistName, x, y) => ctx.strokeText(artistName, x,
  * Draws paths to the terminal nodes of a round
  * @param x, y the point representation of the start of the branch
  */
-const drawMatchup = (canvas, x, y, iter, left) => {
+const drawMatchup = (canvas, x, y, iter, left, artist1, artist2) => {
     const ctx =  canvas.getContext("2d");
     const [width, height] = getDimensions(canvas);
 
@@ -74,21 +74,28 @@ const drawMatchup = (canvas, x, y, iter, left) => {
     ctx.beginPath();
     ctx.moveTo(x, y);
     drawArtist(
-        'test',
+        artist1["name"],
         ...drawBranchUp(width / iter, height / iter)
     );
     ctx.moveTo(x, y);
     drawArtist(
-        'test2',
+        artist2["name"],
         ...drawBranchDown(width / iter, height / iter)
     );
     ctx.stroke();
 }
 
-const drawBracket = (canvas, ...artists) => {
+const drawBracket = (canvas, artists) => {
     drawWinner(canvas);
     const [mid_x, mid_y] = getCenter(canvas);
-    drawMatchup(canvas, mid_x, mid_y, 2 * 3, -1);
+    const groups = 4;
+    const rounds = Math.log2(artists.length / groups);
+    for (let group = 1; group <= groups; group++) {
+        for (let round = 0; round < rounds; round++) {
+            const matchup = [artists.shift(), artists.pop()];
+            drawMatchup(canvas, mid_x, mid_y, 2 * round, Math.pow(-1, group), ...matchup);
+        }
+    }
 }
 
 window.onload = () => {
@@ -121,8 +128,7 @@ window.onload = () => {
         e.preventDefault();
         fetch(encodeURI(`http://localhost:8080/artist/genre?genre_name=${genreInput.value}`))
         .then((response) => response.json())
-        .then((data) => console.log(data));
-        drawBracket(canvas, ...[])
+        .then((data) => drawBracket(canvas, data.slice(0, 33)));
     });
 
     genreInput.addEventListener("input", (e) => {
@@ -141,7 +147,7 @@ window.onload = () => {
 
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    drawBracket(canvas);
+    drawBracket(canvas, []);
 
     const bgImg = new Image();
     bgImg.onload = () => {
