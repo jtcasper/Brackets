@@ -77,7 +77,6 @@ const drawBranchFrom = (ctx, x, y, xDist, yDist, left, up) => {
 
 const drawArtistOnCtx = (ctx, artistName, x, y) => {
     ctx.font = "1em sans serif";
-    ctx.direction = "ltr";
     ctx.strokeText(artistName, x, y);
 }
 
@@ -91,6 +90,7 @@ const drawMatchup = (canvas, x, y, iter, maxIter, left, artists, baseCallback) =
         return baseCallback(x, y);
     }
     const ctx =  canvas.getContext("2d");
+    ctx.direction = left === -1 ? "ltr" : "rtl";
     const [width, height] = getDimensions(canvas);
 
     const drawBranchUp = (xDist, yDist) => drawBranchFrom(ctx, x, y, xDist, yDist, left, -1);
@@ -122,7 +122,6 @@ const drawMatchup = (canvas, x, y, iter, maxIter, left, artists, baseCallback) =
         artists,
         drawArtist2,
     );
-    ctx.stroke();
 }
 
 const drawBracket = (canvas, artists) => {
