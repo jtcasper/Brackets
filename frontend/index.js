@@ -39,6 +39,13 @@ const getDimensions = (canvas) => [canvas.width, canvas.height];
  */
 const getCenter = (canvas) => getDimensions(canvas).map((dim) => dim / 2);
 
+const getRectangleDimensionsUnbound = (canvas, xScale, yScale) => {
+    [width, height] = getDimensions(canvas);
+    return [width * xScale, height * yScale];
+}
+
+const getRectangleDimensions = (canvas) => getRectangleDimensionsUnbound(canvas, .5, .1);
+
 /**
  * Draw champion box and clear background.
  */
@@ -46,8 +53,7 @@ const drawWinner = (canvas) => {
     const ctx = canvas.getContext("2d");
     const [width, height] = getDimensions(canvas);
     const [mid_x, mid_y] = getCenter(canvas);
-    const rect_width = width * .5;
-    const rect_height = height * .1;
+    const [rect_width, rect_height] = getRectangleDimensions(canvas);
     ctx.strokeRect(mid_x - rect_width / 2, mid_y - rect_height / 2, rect_width, rect_height);
     ctx.clearRect(mid_x - rect_width / 2, mid_y - rect_height / 2, rect_width, rect_height);
 }
@@ -99,6 +105,7 @@ const drawMatchup = (canvas, x, y, iter, left, artist1, artist2) => {
 const drawBracket = (canvas, artists) => {
     drawWinner(canvas);
     const [mid_x, mid_y] = getCenter(canvas);
+    const [rect_width, rect_height] = getRectangleDimensions(canvas);
     const groups = 4;
     const rounds = Math.log2(artists.length / groups);
     for (let group = 1; group <= groups; group++) {
