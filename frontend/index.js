@@ -124,10 +124,13 @@ const drawMatchup = (canvas, x, y, iter, maxIter, left, artists, baseCallback) =
     );
 }
 
-const drawBracket = (canvas, artists) => {
-    const context = canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+const drawBracket = (canvas, artists, genre) => {
+    const context = canvas.getContext("2d");
+    context.clearRect(0, 0, canvas.width, canvas.height);
     drawWinner(canvas);
     const [mid_x, mid_y] = getCenter(canvas);
+    context.font = '28px sans serif'
+    context.strokeText(genre.toUpperCase(), mid_x - (28 * (genre.length / 3)), 40);
     const [rect_width, rect_height] = getRectangleDimensions(canvas);
     const groups = 4;
     const rounds = Math.floor(Math.log2(artists.length / groups));
@@ -155,7 +158,7 @@ window.onload = () => {
     const formSubmitAction = () => {
         fetch(encodeURI(`http://localhost:8080/artist/genre?genre_name=${genreInput.value}`))
         .then((response) => response.json())
-        .then((data) => drawBracket(canvas, data.slice(0, 33)));
+        .then((data) => drawBracket(canvas, data.slice(0, 33), genreInput.value));
     }
 
     const createGenreList = (genreList, genres) => {
@@ -196,7 +199,7 @@ window.onload = () => {
 
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    drawBracket(canvas, ['dummy', 'dummy', 'dum' ,'dumhy']);
+    drawBracket(canvas, ['dummy', 'dummy', 'dum' ,'dumhy'], "");
 
     const bgImg = new Image();
     bgImg.onload = () => {
