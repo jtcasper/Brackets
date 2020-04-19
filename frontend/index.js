@@ -1,5 +1,16 @@
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+/**
+ * Safari iOS pls
+ */
+const formSubmitPolyfill = (form, callback) => {
+    if (form.requestSubmit) {
+        form.requestSubmit();
+    } else {
+        callback();
+    }
+}
+
 const createGenreListWithClickEvent = (genreList, genres, callback) => {
     genreList.append(...genres.map((genre) => {
         const name = genre["name"];
@@ -105,10 +116,16 @@ window.onload = () => {
     const genreForm = document.getElementById("genre-form");
     const canvas = document.getElementById("bracket");
 
+    const formSubmitAction = () => {
+        fetch(encodeURI(`http://localhost:8080/artist/genre?genre_name=${genreInput.value}`))
+        .then((response) => response.json())
+        .then((data) => drawBracket(canvas, data.slice(0, 33)));
+    }
+
     const createGenreList = (genreList, genres) => {
         return createGenreListWithClickEvent(genreList, genres, (e) => {
             genreInput.value = e.target.innerText;
-            genreForm.requestSubmit();
+            formSubmitPolyfill(genreForm, formSubmitAction);
         })
     }
     let genres = JSON.parse(lStorage.getItem("genres"))
@@ -126,9 +143,7 @@ window.onload = () => {
 
     genreForm.addEventListener("submit", (e) => {
         e.preventDefault();
-        fetch(encodeURI(`http://localhost:8080/artist/genre?genre_name=${genreInput.value}`))
-        .then((response) => response.json())
-        .then((data) => drawBracket(canvas, data.slice(0, 33)));
+        formSubmitAction()
     });
 
     genreInput.addEventListener("input", (e) => {
