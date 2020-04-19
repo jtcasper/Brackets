@@ -71,33 +71,56 @@ const drawBranchFrom = (ctx, x, y, xDist, yDist, left, up) => {
     const newY = y + (yDist * up)
     ctx.lineTo(x, newY);
     ctx.lineTo(newX, newY);
+    ctx.stroke();
     return [newX, newY];
 }
 
-const drawArtistOnCtx = (ctx, artistName, x, y) => ctx.strokeText(artistName, x, y);
+const drawArtistOnCtx = (ctx, artistName, x, y) => {
+    ctx.font = "1em sans serif";
+    ctx.direction = "ltr";
+    ctx.strokeText(artistName, x, y);
+}
 
 /**
  * Draws paths to the terminal nodes of a round
  * @param x, y the point representation of the start of the branch
+ * @param baseCallback a callback that needs the terminal x,y context
  */
-const drawMatchup = (canvas, x, y, iter, left, artist1, artist2) => {
+const drawMatchup = (canvas, x, y, iter, maxIter, left, artists, baseCallback) => {
+    if (iter === maxIter) {
+        return baseCallback(x, y);
+    }
     const ctx =  canvas.getContext("2d");
     const [width, height] = getDimensions(canvas);
 
-    const drawBranchUp = (xDist, yDist) => drawBranchFrom(ctx, x, y, xDist, yDist, left, 1);
-    const drawBranchDown = (xDist, yDist) => drawBranchFrom(ctx, x, y, xDist, yDist, left, -1);
+    const drawBranchUp = (xDist, yDist) => drawBranchFrom(ctx, x, y, xDist, yDist, left, -1);
+    const drawBranchDown = (xDist, yDist) => drawBranchFrom(ctx, x, y, xDist, yDist, left, 1);
     const drawArtist = (artistName, x, y) => drawArtistOnCtx(ctx, artistName, x, y);
+    const drawArtist1 = (x, y) => drawArtist(artists.shift()["name"], x, y);
+    const drawArtist2 = (x, y) => drawArtist(artists.pop()["name"], x, y);
 
     ctx.beginPath();
     ctx.moveTo(x, y);
-    drawArtist(
-        artist1["name"],
-        ...drawBranchUp(width / iter, height / iter)
+    const branchDistances = [width / (5 * (iter + 1)), height / (9 * (iter + 1))];
+    drawMatchup(
+        canvas,
+        ...drawBranchUp(...branchDistances),
+        iter + 1,
+        maxIter,
+        left,
+        artists,
+        drawArtist1,
     );
+
     ctx.moveTo(x, y);
-    drawArtist(
-        artist2["name"],
-        ...drawBranchDown(width / iter, height / iter)
+    drawMatchup(
+        canvas,
+        ...drawBranchDown(...branchDistances),
+        iter + 1,
+        maxIter,
+        left,
+        artists,
+        drawArtist2,
     );
     ctx.stroke();
 }
@@ -107,12 +130,18 @@ const drawBracket = (canvas, artists) => {
     const [mid_x, mid_y] = getCenter(canvas);
     const [rect_width, rect_height] = getRectangleDimensions(canvas);
     const groups = 4;
-    const rounds = Math.log2(artists.length / groups);
+    const rounds = Math.floor(Math.log2(artists.length / groups));
     for (let group = 1; group <= groups; group++) {
-        for (let round = 0; round < rounds; round++) {
-            const matchup = [artists.shift(), artists.pop()];
-            drawMatchup(canvas, mid_x, mid_y, 2 * round, Math.pow(-1, group), ...matchup);
-        }
+            drawMatchup(
+                canvas,
+                mid_x + (Math.pow(-1, group) * (rect_width / 4)),
+                mid_y + (Math.pow(-1, Math.floor(group / 2)) * (rect_height * 2)),
+                0,
+                rounds,
+                Math.pow(-1, group),
+                artists,
+                (x, y) => console.log("hello")
+            );
     }
 }
 
@@ -167,7 +196,7 @@ window.onload = () => {
 
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    drawBracket(canvas, []);
+    drawBracket(canvas, ['dummy', 'dummy', 'dum' ,'dumhy']);
 
     const bgImg = new Image();
     bgImg.onload = () => {
