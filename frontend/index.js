@@ -135,7 +135,10 @@ const drawBracket = (canvas, artists, genre) => {
     context.textAlign = "start";
     const [rect_width, rect_height] = getRectangleDimensions(canvas);
     const groups = 4;
-    const rounds = Math.floor(Math.log2(artists.length / groups));
+    const rounds = Math.max(
+        Math.floor(Math.log2(artists.length / groups)),
+        1
+    );
     for (let group = 1; group <= groups; group++) {
             drawMatchup(
                 canvas,
