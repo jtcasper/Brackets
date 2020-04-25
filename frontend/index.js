@@ -1,5 +1,21 @@
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+const getGenres = (lStorage) => {
+    return new Promise((resolve) => {
+        const genres = JSON.parse(lStorage.getItem("genres"))
+        if (genres === null) {
+            fetch("http://api.brackets.jacobcasper.com/genre")
+                .then((response) => response.text())
+                .then((text) => {
+                    lStorage.setItem("genres", text);
+                    resolve(JSON.parse(text));
+                })
+        } else {
+            resolve(genres);
+        }
+    });
+}
+
 /**
  * Safari iOS pls
  */
@@ -176,12 +192,6 @@ window.onload = () => {
     const genreForm = document.getElementById("genre-form");
     const canvas = document.getElementById("bracket");
 
-    const formSubmitAction = () => {
-        fetch(encodeURI(`http://api.brackets.jacobcasper.com/artist/genre?genre_name=${genreInput.value}`))
-        .then((response) => response.json())
-        .then((data) => drawBracket(canvas, data.slice(0, 33), genreInput.value));
-    }
-
     const genreFormSubmitPolyfill = () => formSubmitPolyfill(genreList, formSubmitAction)
 
     const createGenreList = (genreList, genres) => {
@@ -190,17 +200,14 @@ window.onload = () => {
             genreFormSubmitPolyfill()
         })
     }
-    let genres = JSON.parse(lStorage.getItem("genres"))
-    if (genres === null) {
-        fetch("http://api.brackets.jacobcasper.com/genre")
-            .then((response) => response.text())
-            .then((text) => {
-                window.localStorage.setItem("genres", text);
-                genres = JSON.parse(text);
-                createGenreList(genreList, genres);
-            });
-    } else {
-        createGenreList(genreList, genres);
+
+    const genres = getGenres(lStorage)
+        .then((genres) => createGenreList(genreList, genres));
+
+    const formSubmitAction = () => {
+        fetch(encodeURI(`http://api.brackets.jacobcasper.com/artist/genre?genre_name=${genreInput.value}`))
+        .then((response) => response.json())
+        .then((data) => drawBracket(canvas, data.slice(0, 33), genreInput.value));
     }
 
     genreForm.addEventListener("submit", (e) => {
