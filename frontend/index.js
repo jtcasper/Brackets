@@ -220,10 +220,6 @@ window.onload = () => {
     const bgImg = new Image();
     bgImg.onload = () => {
         const ctx = canvas.getContext("2d");
-        //ctx.mozImageSmoothingEnabled = false;
-        //ctx.webkitImageSmoothingEnabled = false;
-        //ctx.msImageSmoothingEnabled = false;
-        //ctx.imageSmoothingEnabled = false;
         ctx.drawImage(
             bgImg, 
             0, 
