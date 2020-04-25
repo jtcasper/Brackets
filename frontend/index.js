@@ -96,8 +96,21 @@ const drawMatchup = (canvas, x, y, iter, maxIter, left, artists, baseCallback) =
     const drawBranchUp = (xDist, yDist) => drawBranchFrom(ctx, x, y, xDist, yDist, left, -1);
     const drawBranchDown = (xDist, yDist) => drawBranchFrom(ctx, x, y, xDist, yDist, left, 1);
     const drawArtist = (artistName, x, y) => drawArtistOnCtx(ctx, artistName, x, y);
-    const drawArtist1 = (x, y) => drawArtist(artists.shift()["name"], x, y);
-    const drawArtist2 = (x, y) => drawArtist(artists.pop()["name"], x, y);
+    const drawArtist1 = (x, y) => {
+        const artist1 = artists.shift();
+        if (!artist1) {
+            return;
+        }
+        drawArtist(artist1["name"], x, y);
+    }
+
+    const drawArtist2 = (x, y) => {
+        const artist2 = artists.pop();
+        if (!artist2) {
+            return;
+        }
+        drawArtist(artist2["name"], x, y);
+    }
 
     ctx.beginPath();
     ctx.moveTo(x, y);
@@ -140,6 +153,9 @@ const drawBracket = (canvas, artists, genre) => {
         1
     );
     for (let group = 1; group <= groups; group++) {
+        if (artists.length === 0) {
+            break;
+        }
             drawMatchup(
                 canvas,
                 mid_x + (Math.pow(-1, group) * (rect_width / 6)),
@@ -199,7 +215,7 @@ window.onload = () => {
 
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    drawBracket(canvas, ['dummy', 'dummy', 'dum' ,'dumhy'], "");
+    drawBracket(canvas, [], "");
 
     const bgImg = new Image();
     bgImg.onload = () => {
