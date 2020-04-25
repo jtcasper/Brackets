@@ -14,11 +14,11 @@ const formSubmitPolyfill = (form, callback) => {
 const createGenreListWithClickEvent = (genreList, genres, callback) => {
     genreList.append(...genres.map((genre) => {
         const name = genre["name"];
-        const li = document.createElement("li");
-        li.setAttribute("data-name", name);
-        li.addEventListener("click", callback);
-        li.appendChild(document.createTextNode(name));
-        return li;
+        const option = document.createElement("option");
+        option.setAttribute("data-name", name);
+        option.addEventListener("click", callback);
+        option.appendChild(document.createTextNode(name));
+        return option;
     }));
 }
 
@@ -163,10 +163,12 @@ window.onload = () => {
         .then((data) => drawBracket(canvas, data.slice(0, 33), genreInput.value));
     }
 
+    const genreFormSubmitPolyfill = () => formSubmitPolyfill(genreList, formSubmitAction)
+
     const createGenreList = (genreList, genres) => {
         return createGenreListWithClickEvent(genreList, genres, (e) => {
             genreInput.value = e.target.innerText;
-            formSubmitPolyfill(genreForm, formSubmitAction);
+            genreFormSubmitPolyfill()
         })
     }
     let genres = JSON.parse(lStorage.getItem("genres"))
@@ -187,15 +189,8 @@ window.onload = () => {
         formSubmitAction()
     });
 
-    genreInput.addEventListener("input", (e) => {
-        const input = e.target;
-        Array.from(genreList.children).forEach((item) => item.style.display= item.dataset.name.includes(input.value.toLowerCase()) ? "block" : "none");
-    });
-    genreInput.addEventListener("focus", (e) => {
-        genreList.style.display = "block";
-    });
-    genreInput.addEventListener("blur", (e) => {
-        sleep(150).then(() => genreList.style.display = "none");
+    genreInput.addEventListener("change", (e) => {
+        genreFormSubmitPolyfill()
     });
 
 

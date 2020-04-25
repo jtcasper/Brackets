@@ -8,17 +8,19 @@
     </head>
     <body>
         <form id="genre-form">
+            <label for="genre-input">Pick your favorite genre:</labe>
             <input id="genre-input" 
                    type="text"
+                   list="genre-list"
                    placeholder="Genre Name"
                    autocomplete="off"/>
             <input id="genre-submit"
                    type="submit"/>
         </form>
-        <ul id="genre-list"></ul>
         <canvas id="bracket"></canvas> 
         <input id="image-upload" 
                type="file"
                accept="image/*">
+        <datalist id="genre-list"/>
     </body>
 </html>
